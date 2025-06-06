@@ -5,42 +5,38 @@ from src.clean_data import clean_data
 from src.visualise import visualise
 # from src.insights import generate_insights
 
+st.set_page_config(page_title="Data Explorer", layout="wide")
 
-st.title("Data Viz Tool")
+st.title("🧪 Data Viz Tool")
 
 file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"], accept_multiple_files=False)
 
 if file:
+    data_raw = load_data(file)
+
+    if "cleaned_df" not in st.session_state:
+        st.session_state.cleaned_df = data_raw.copy()
+
     st.subheader("Raw Data")
-    data = load_data(file)
-    st.write(data)
+    st.dataframe(data_raw)
 
-    tab = st.radio("Choose what you want to do:", ["🧹 Clean Data", "📈 Visualize Data"])
+    option = st.radio("Choose what you want to do:", ["🧹 Clean Data", "📈 Visualize Data", "🔍 Generate Insights"], horizontal=True)
 
-    if tab == "🧹 Clean Data":
-        clean_data(data)
-    elif tab == "📈 Visualize Data":
-        visualise(data)
+    if option == "🧹 Clean Data":
+        cleaned_data = clean_data(data_raw.copy())
+        st.session_state.cleaned_df = cleaned_data 
 
-    # st.subheader("Cleaned Data")
-    # cleaned_data = clean_data(data)
-    # st.write(cleaned_data)
+        csv = cleaned_data.to_csv(index=False).encode('utf-8')
+        st.download_button("Download Cleaned Data as CSV", data=csv, file_name="cleaned_data.csv", mime="text/csv")
 
-    # if st.checkbox("Show raw data"):
-    #     st.write(data)
+    elif option == "📈 Visualize Data":
+        st.subheader("📊 Visualization")
 
-    # if st.checkbox("Show cleaned data"):
-    #     st.write(cleaned_data)
+        data_source = st.radio("Choose data source", ["Raw Data", "Cleaned Data"], horizontal=True)
 
-    # if st.checkbox("Generate insights"):
-    #     insights = generate_insights(cleaned_data)
-    #     st.write(insights)
+        data_to_use = data_raw if data_source == "Raw Data" else st.session_state.cleaned_df
 
-    # if st.checkbox("Visualize data"):
-    #     visualize(cleaned_data)
+        visualise(data_to_use)
 
-    # if st.checkbox("Save cleaned data"):
-    #     save_data(cleaned_data)§
-
-    # if st.checkbox("Save visualization"):
-    #     save_visualization(visualization)
+else:
+    st.info("Upload a CSV or Excel file to begin.")

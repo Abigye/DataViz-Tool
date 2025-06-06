@@ -19,7 +19,7 @@ It allows users to clean  data based on vairious options and visualize data from
 ## Installation
 
 ```bash
-pip install pandas streamlit plotly
+pip install pandas streamlit plotly kaleido
 ```
 
 ## Usage
